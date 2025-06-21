@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Auto Job Applier Bot | Jama Jama</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    body {
+      background: linear-gradient(to right, #1f4037, #99f2c8);
+      color: #f4f4f4;
+      font-family: 'Courier New', Courier, monospace;
+    }
+
+    .container {
+      padding: 60px 20px;
+    }
+
+    .project-title {
+      font-size: 3rem;
+      background: linear-gradient(to right, #43cea2, #185a9d);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 20px;
+    }
+
+    .section-title {
+      font-size: 1.8rem;
+      margin-top: 40px;
+      border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+      padding-bottom: 10px;
+    }
+
+    .code-block {
+      background: rgba(255, 255, 255, 0.08);
+      border-left: 5px solid #43cea2;
+      padding: 20px;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      font-family: monospace;
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1 class="project-title">Auto Job Applier Bot</h1>
+    <p>This Python Selenium project automates job applications on LinkedIn using Easy Apply. The script logs in,
+      navigates job listings, checks for previously applied jobs, and submits applications where applicable. A subtle
+      robotic vibe adds flair to the project.</p>
+
+    <h2 class="section-title">Python Automation Script</h2>
+    <div class="code-block">
+      from selenium import webdriver
+      from selenium.webdriver.common.by import By
+      from selenium.common.exceptions import NoSuchElementException, StaleElementReferenceException
+      import time
+      import os
+      from dotenv import load_dotenv
+
+      load_dotenv()
+      email = os.getenv("EMAIL")
+      password = os.getenv("PASSWORD")
+      phone = os.getenv("PHONE")
+
+      options = webdriver.ChromeOptions()
+      options.add_experimental_option("detach", True)
+      driver = webdriver.Chrome(options=options)
+
+      driver.get("https://www.linkedin.com/jobs/search/?keywords=Retail")
+      time.sleep(10)
+
+      driver.find_element(By.XPATH,
+      '//*[@id="base-contextual-sign-in-modal"]/div/section/div/div/div/div[2]/button').click()
+      driver.find_element(By.XPATH, '//*[@id="base-sign-in-modal_session_key"]').send_keys(email)
+      driver.find_element(By.XPATH, '//*[@id="base-sign-in-modal_session_password"]').send_keys(password)
+      driver.find_element(By.XPATH, '//*[@id="base-sign-in-modal"]/div/section/div/div/form/div[2]/button').click()
+      time.sleep(5)
+
+      job_list = driver.find_elements(By.XPATH,
+      '/html/body/div[7]/div[3]/div[4]/div/div/main/div/div[2]/div[1]/div/ul/li')
+      for job in job_list:
+      time.sleep(2)
+      try:
+      job.click()
+      except StaleElementReferenceException:
+      continue
+
+      try:
+      botA = job.find_element(By.CSS_SELECTOR, ".artdeco-inline-feedback__message").text.split(" ")[0]
+      if botA == "Applied":
+      continue
+      except NoSuchElementException:
+      pass
+
+      try:
+      driver.find_element(By.CSS_SELECTOR, '.jobs-apply-button').click()
+      while True:
+      time.sleep(2)
+      try:
+      driver.find_element(By.CSS_SELECTOR, 'button[aria-label="Submit application"]').click()
+      break
+      except NoSuchElementException:
+      pass
+
+      try:
+      driver.find_element(By.CSS_SELECTOR, 'button[aria-label="Continue to next step"]').click()
+      except NoSuchElementException:
+      break
+
+      except NoSuchElementException:
+      continue
+    </div>
+
+    <h2 class="section-title">Project Highlights</h2>
+    <ul>
+      <li>Automates LinkedIn "Easy Apply" job listings</li>
+      <li>Handles dynamic elements, errors, and multi-step forms</li>
+      <li>Discards incomplete or failed attempts cleanly</li>
+      <li>Enhances job search efficiency with minimal user input</li>
+    </ul>
+  </div>
+</body>
+
+</html>
